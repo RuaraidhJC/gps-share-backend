@@ -4,12 +4,14 @@ const express = require('express');
 const app = express()
 const jwt = require('jsonwebtoken');
 const checkAuth = require('./middleware/jwt');
-const { Expo } = require('expo-server-sdk')
+const { Expo } = require('expo-server-sdk');
+const logger = require('morgan');
 // Create a new Expo SDK client
 let expo = new Expo();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(logger('dev'));
 
 app.get('/', checkAuth.checkToken, function (req, res) {
   console.log(req.user)
