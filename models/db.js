@@ -9,6 +9,7 @@ const db = {};
 const sequelize = new Sequelize({
   storage: './db.sqlite',
   dialect: 'sqlite',
+  logging: console.log,
   define: {
     defaultScope: {
       attributes: { exclude: ["createdAt", "updatedAt"] }

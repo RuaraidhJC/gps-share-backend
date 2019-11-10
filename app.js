@@ -65,7 +65,7 @@ app.post('/login', async function (req, res) {
       });
     }
     let token = jwt.sign({email}, 'epitech');
-    await user.update({notificationToken: notificationToken});
+    await user.update({notificationToken});
     // return the JWT token for the future API calls
     res.json({
       success: true,
@@ -100,7 +100,9 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
     body: address,
   });
   let chunk = expo.chunkPushNotifications(messages)[0];
+  console.log(chunk);
   let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+  console.log(ticketChunk);
 
 
 });
