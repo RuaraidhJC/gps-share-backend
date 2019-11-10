@@ -65,7 +65,7 @@ app.post('/login', async function (req, res) {
       });
     }
     let token = jwt.sign({email}, 'epitech');
-    await user.update({notificationToken});
+    await user.update({token, notificationToken});
     // return the JWT token for the future API calls
     res.json({
       success: true,
