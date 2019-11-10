@@ -84,7 +84,8 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
   const user = req.user;
   const email = req.body.email;
   const address = req.body.address;
-  const pushToken = User.findOne({where: {email}});
+  const expeditor = await User.findOne({where: {email}});
+  const pushToken = expeditor.notificationToken;
   if (!Expo.isExpoPushToken(pushToken)) {
     console.error(`Push token ${pushToken} is not a valid Expo push token`);
     return;
