@@ -82,7 +82,7 @@ app.post('/login', async function (req, res) {
 
 app.post('/push', checkAuth.checkToken, async function (req, res)  {
   const user = req.user;
-  const email = req.body.email;
+  const email = req.body.to;
   const address = req.body.address;
   const expeditor = await User.findOne({where: {email}});
   const pushToken = expeditor.notificationToken;
@@ -94,9 +94,10 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
   // Construct a message (see https://docs.expo.io/versions/latest/guides/push-notifications.html)
   messages.push({
     to: pushToken,
+    title: user.email + " vous a envoyé sa position",
+    _displayInForeground: true,
     sound: 'default',
-    body: 'This is a test notification',
-    data: { withSome: 'data' },
+    body: address,
   });
   let chunk = expo.chunkPushNotifications(messages)[0];
   let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
@@ -106,4 +107,4 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
 
 app.listen(3100, function () {
   console.log('Example app listening on port 3000!')
-})
+});
