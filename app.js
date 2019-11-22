@@ -84,6 +84,7 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
   const user = req.user;
   const email = req.body.to;
   const address = req.body.address;
+  const coords = req.body.coordinate
   const expeditor = await User.findOne({where: {email}});
   const pushToken = expeditor.notificationToken;
   if (!Expo.isExpoPushToken(pushToken)) {
@@ -98,6 +99,7 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
     _displayInForeground: true,
     sound: 'default',
     body: address,
+    data: {coordinate: coords}
   });
   let chunk = expo.chunkPushNotifications(messages)[0];
   let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
