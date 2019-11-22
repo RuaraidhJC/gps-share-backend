@@ -99,7 +99,7 @@ app.post('/push', checkAuth.checkToken, async function (req, res)  {
     _displayInForeground: true,
     sound: 'default',
     body: address,
-    data: {coordinate: coords}
+    data: {coordinate: coords, email: email}
   });
   let chunk = expo.chunkPushNotifications(messages)[0];
   let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
