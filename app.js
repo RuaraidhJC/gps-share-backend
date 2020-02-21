@@ -27,20 +27,18 @@ app.post('/register', async function (req, res) {
       let token = jwt.sign({email},
           "epitech"
       );
-      const user = await User.create({email: email, password: password, token: token, notificationToken: notificationToken});;
-      if (!user) {
-        console.log(token);
-        // return the JWT token for the future API calls
+      try {
+        await User.create({email: email, password: password, token: token, notificationToken: notificationToken});;
+      } catch (err) {
+        res.json({
+          success: false,
+          message: `Couldn't create user for ${email}`,
+        });
+      } finally {
         res.json({
           success: true,
           message: 'Authentication successful!',
           token: token
-        });
-
-      } else {
-        res.json({
-          success: false,
-          message: `Couldn't create user for ${email}`,
         });
       }
     } else {
