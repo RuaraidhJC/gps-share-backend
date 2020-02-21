@@ -24,11 +24,11 @@ app.post('/register', async function (req, res) {
     let notificationToken = req.body.notificationToken;
 
     if (email && password) {
-      const find = await User.findOne({where: {email: email}});
-      if (!find) {
-        let token = jwt.sign({email},
+      let token = jwt.sign({email},
           "epitech"
-        );
+      );
+      const user = await User.create({email: email, password: password, token: token, notificationToken: notificationToken});;
+      if (!user) {
         console.log(token);
         // return the JWT token for the future API calls
         res.json({
@@ -36,11 +36,11 @@ app.post('/register', async function (req, res) {
           message: 'Authentication successful!',
           token: token
         });
-        User.create({email: email, password: password, token: token, notificationToken: notificationToken});
+
       } else {
         res.json({
           success: false,
-          message: 'User already exists',
+          message: `Couldn't create user for ${email}`,
         });
       }
     } else {
