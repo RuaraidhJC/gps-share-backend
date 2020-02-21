@@ -28,11 +28,11 @@ app.post('/register', async function (req, res) {
           "epitech"
       );
       try {
-        await User.create({email: email, password: password, token: token, notificationToken: notificationToken});;
+        await User.create({email: email, password: password, token: token, notificationToken: notificationToken});
       } catch (err) {
         res.json({
           success: false,
-          message: `Couldn't create user for ${email}`,
+          message: `Couldn't create user for ${email}: ${err}`,
         });
       } finally {
         res.json({
