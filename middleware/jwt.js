@@ -1,5 +1,5 @@
 let jwt = require('jsonwebtoken');
-const User = require('../models/db')['user'];
+const User = require('../old-models/db')['user'];
 
 let checkToken = async(req, res, next) => {
   let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase

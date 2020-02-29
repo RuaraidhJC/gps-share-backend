@@ -4,7 +4,7 @@ const uuid = require("uuid/v4");
 
 module.exports = (sequelize, DataTypes) => {
   // Add a last connection field?
-  const User = sequelize.define('user', {
+  const User = sequelize.define('User', {
 
     /**
      * Attributes
@@ -25,16 +25,17 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    profileUrl: {
+      type:DataTypes.STRING,
+      allowNull: false,
+      defaultValue: () => `/images/avatar-${Math.floor(Math.random() * 59) + 100}.png`
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notEmpty: true
       }   // More validators on the password (ex: no '12345' or 'password' passwords)
-    },
-    token: {
-      type: DataTypes.STRING,
-      allowNull: true
     },
     notificationToken: {
       type: DataTypes.STRING,
@@ -62,7 +63,11 @@ module.exports = (sequelize, DataTypes) => {
      */
 
     scopes: {
-
+      sanitized: {
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt']
+        }
+      }
     },
 
   });
@@ -71,7 +76,10 @@ module.exports = (sequelize, DataTypes) => {
    * Associations
    */
 
-
+  User.associate = function(models) {
+    models['User'].belongsToMany(models['User'], {as: 'friends', through: models['FriendReq']});
+    models['User'].hasMany(models['FriendReq']);
+  };
 
   /**
    * Instance methods
@@ -82,16 +90,24 @@ module.exports = (sequelize, DataTypes) => {
    * Hooks
    */
 
+  User.generateHash = function(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+  };
+
+// checking if password is valid
+  User.validPassword = async function(password, userID) {
+    const user = await User.unscoped().findByPk(userID);
+    return bcrypt.compareSync(password, user.password);
+  };
+
+
   User.beforeCreate((user) => {
     // Hash password systematically on user creation
-    let password = bcrypt.hashSync(user.password, 10);
+    const password =  User.generateHash(user.password);
     user.password = password;
     return password;
   });
 
-  User.beforeUpdate((user, options, fn) => {
-
-  });
 
   User.prototype.checkPassword = async function(password)  {
     return bcrypt.compareSync(password, this.password);
