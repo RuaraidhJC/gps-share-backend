@@ -17,7 +17,10 @@ module.exports = function(passport) {
     passport.deserializeUser(async (id, done) => {
         const user = await User.findByPk(id, {
             include: [
-                Position,
+                {
+                    model: Position,
+                    attributes: ['longitude', 'latitude', 'message', 'rating', 'createdAt']
+                },
                 {
                     model: FriendReq,
                     as: 'OpenFriendReqs',
@@ -30,7 +33,10 @@ module.exports = function(passport) {
                         where: { isConfirmed: true },
                         attributes: [],
                     },
-                    include: [Position]
+                    include: [{
+                        model: Position,
+                        attributes: ['longitude', 'latitude', 'message', 'rating', 'createdAt']
+                    }]
                 }
             ]
         }, (err) => {

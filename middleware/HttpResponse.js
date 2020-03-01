@@ -41,6 +41,7 @@ function HttpResponse(thrownResponse, req, res, next) {
             }
         })();
     }
+    delete thrownResponse.notification;
     res.status(thrownResponse.status || 500).send(thrownResponse);
     next();
 }

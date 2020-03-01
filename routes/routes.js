@@ -1,6 +1,7 @@
 const db = require("../models/index");
 const User = db['User'];
 const FriendReq = db['FriendReq'];
+const Position = db['Position'];
 const HttpResponse = require('../middleware/HttpResponse');
 
 module.exports = function(app, passport) {
@@ -11,6 +12,18 @@ module.exports = function(app, passport) {
 
     app.post('/login', passport.authenticate('local-login'), (req, res, next) => {
         return next(new HttpResponse.OkResponse(req.user));
+    });
+
+    app.post('/position', isLoggedIn, async (req, res, next) => {
+        const {longitude, latitude, rating, message} = req.body;
+        const position = await Position.create({
+            longitude,
+            latitude,
+            rating,
+            message
+        });
+        await req.user.addPosition(position);
+        return next(new HttpResponse.OkResponse('ok'));
     });
 
     app.get('/add-friend', isLoggedIn, async (req, res, next) => {
