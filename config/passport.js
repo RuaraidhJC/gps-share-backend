@@ -55,14 +55,16 @@ module.exports = function(passport) {
         console.log(email);
         const user = await User.findOne({ where: {email: email} });
         console.log(user);
-        if (!user)
+        if (!user || !req.body.notificationToken)
             return done(null, false);
         const valid = await User.validPassword(password, user.id);
         if (!valid)
             return done(null, false);
-        else
+        else {
+            await user.update({notificationToken: req.body.notificationToken});
+            await user.reload();
             return done(null, user);
-
+        }
     }));
 
     passport.use('local-signup', new LocalStrategy({
@@ -80,15 +82,14 @@ module.exports = function(passport) {
         const user = await User.findOne({where: {email}});
         if (user)
             return done(null, false);
-        await User.create({
+        const newUser = await User.create({
             email: email,
             password: password,
             notificationToken: req.body.notificationToken
         });
-        const newUser = await User.findOne({where:{email:email}});
-        console.log(newUser);
         if (!newUser)
             return done(null, false);
+        await newUser.reload();
         return done(null, newUser);
 
     }));

@@ -10,7 +10,7 @@ module.exports = function(app, passport) {
     });
 
     app.post('/login', passport.authenticate('local-login'), (req, res, next) => {
-        return next(new HttpResponse.OkResponse());
+        return next(new HttpResponse.OkResponse(req.user));
     });
 
     app.get('/add-friend', isLoggedIn, async (req, res, next) => {
