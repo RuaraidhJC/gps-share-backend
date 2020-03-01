@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     notificationToken: {
       type: DataTypes.STRING,
       allowNull: true
-    }
+    },
   }, {
 
     /**
@@ -77,8 +77,16 @@ module.exports = (sequelize, DataTypes) => {
    */
 
   User.associate = function(models) {
-    models['User'].belongsToMany(models['User'], {as: 'friends', through: models['FriendReq']});
+    models['User'].belongsToMany(models['User'], {as: 'Friends', through: models['FriendReq']});
     models['User'].hasMany(models['FriendReq']);
+    models['User'].hasMany(models['FriendReq'], {
+      scope: {
+        isConfirmed: false
+      },
+      as: 'OpenFriendReqs'
+    });
+
+    models['User'].hasMany(models['Position']);
   };
 
   /**

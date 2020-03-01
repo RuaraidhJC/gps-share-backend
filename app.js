@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 
 const db = require('./models/index');
+const HttpResponse = require('./middleware/HttpResponse');
 
 require('./config/passport')(passport); // pass passport for configuration
 
@@ -31,6 +32,7 @@ app.use(express.static('public'));
 // routes ======================================================================
 require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
+app.use(HttpResponse.Middleware);
 // launch ======================================================================
 db.sync().then(() => {
   app.listen(port);

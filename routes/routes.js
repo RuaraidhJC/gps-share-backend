@@ -1,37 +1,31 @@
 const db = require("../models/index");
 const User = db['User'];
 const FriendReq = db['FriendReq'];
+const HttpResponse = require('../middleware/HttpResponse');
 
 module.exports = function(app, passport) {
 
-    app.get('/me', isLoggedIn, function(req, res) {
-        res.send(req.user);
+    app.get('/me', isLoggedIn, function(req, res, next) {
+        return next(new HttpResponse.OkResponse(req.user));
     });
 
     app.post('/login', passport.authenticate('local-login'), (req, res, next) => {
-        res.send("ok");
-        next();
+        return next(new HttpResponse.OkResponse());
     });
 
     app.get('/add-friend', isLoggedIn, async (req, res, next) => {
         try {
-
-
             if (!req.query.email)
-                return next('error');
-            if (req.user.friends.find(elem => elem.email === req.query.email)) {
-                res.send("already friend");
-                return next();
-            }
+                return next(new HttpResponse.BadRequestResponse('Please provide an email to add as friend'));
+            if (req.user.Friends.find(elem => elem.email === req.query.email))
+                return next(new HttpResponse.BadRequestResponse('Youre already friends!'));
             const confirm = (req.query.confirm === 'true');
             const receiver = await User.findOne({
                 where: {email: req.query.email},
-                include: [FriendReq, {model: User, as: 'friends'}]
+                include: [FriendReq, {model: User, as: 'Friends'}]
             });
-            if (!receiver) {
-                res.send("bad friend email");
-                return next('error');
-            }
+            if (!receiver)
+                return next(new HttpResponse.BadRequestResponse('Couldnt find friends email'));
             if (confirm) {
                 const existingRequest = await req.user.getFriendReqs({
                     where: {
@@ -40,41 +34,38 @@ module.exports = function(app, passport) {
                         isConfirmed: false
                     }
                 });
-                if (!existingRequest) {
-                    res.send("no exiting friend request");
-                    return next('error');
+                if (!existingRequest.length) {
+                    return next(new HttpResponse.BadRequestResponse('no existing friend request'));
                 }
+                console.log(existingRequest);
                 await req.user.addFriend(receiver, {through: {isConfirmed: true}});
                 await receiver.addFriend(req.user, {through: {isConfirmed: true}});
-                res.send("ok");
-                return next();
+                return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [req.query.email], message: 'A friend request has been accepted', body: `${req.user.email} is now your friend`}));
             }
+            console.log({through: {sender: req.user.email, receiver: receiver.email}});
             await req.user.addFriend(receiver, {through: {sender: req.user.email, receiver: receiver.email}});
             await receiver.addFriend(req.user, {through: {sender: req.user.email, receiver: receiver.email}});
-            res.send("ok");
-            return next()
+            return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [receiver.email], message: 'You received a new friend request', body: `${req.user.email} wants to be your friend`}));
         } catch (err) {
             console.log(err)
         }
     });
 
     app.post('/signup', passport.authenticate('local-signup'), (req, res, next) => {
-        res.json({mess: 'ok'});
-        next();
+        return next(new HttpResponse.OkResponse(req.user));
     });
 
-    app.get('/logout', (req, res) => {
+    app.get('/logout', (req, res, next) => {
         req.logout();
-        res.send("ok");
+        return next(new HttpResponse.OkResponse('ok'));
     });
 
 };
 
-// route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
 
     //res.send('not auth');
-    return next('error');
+    return next(new HttpResponse.UnauthorizedResponse());
 }
