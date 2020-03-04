@@ -24,7 +24,7 @@ module.exports = function(app, passport) {
         });
         await req.user.addPosition(position);
         const emailList = req.user['Friends'].map(elem => elem.email);
-        return next(new HttpResponse.OkResponse('ok', 'ok', {userList: emailList, message: 'A new position has been shared with you', body: `${req.user.email} sent you his position`}));
+        return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [req.user.list, ...emailList], message: 'A new position has been shared with you', body: `${req.user.email} sent you his position`}));
     });
 
     app.get('/add-friend', isLoggedIn, async (req, res, next) => {
@@ -54,12 +54,12 @@ module.exports = function(app, passport) {
                 console.log(existingRequest);
                 await req.user.addFriend(receiver, {through: {isConfirmed: true}});
                 await receiver.addFriend(req.user, {through: {isConfirmed: true}});
-                return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [req.query.email], message: 'A friend request has been accepted', body: `${req.user.email} is now your friend`}));
+                return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [req.query.email, receiver.email], message: 'A friend request has been accepted', body: `${req.user.email} is and ${receiver.email} are now friends`}));
             }
             console.log({through: {sender: req.user.email, receiver: receiver.email}});
             await req.user.addFriend(receiver, {through: {sender: req.user.email, receiver: receiver.email}});
             await receiver.addFriend(req.user, {through: {sender: req.user.email, receiver: receiver.email}});
-            return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [receiver.email], message: 'You received a new friend request', body: `${req.user.email} wants to be your friend`}));
+            return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [receiver.email, req.query.email], message: 'You received a new friend request', body: `${req.user.email} wants to be friends with ${receiver.email}`}));
         } catch (err) {
             console.log(err)
         }
