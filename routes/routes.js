@@ -17,6 +17,7 @@ module.exports = function(app, passport) {
     app.post('/position', isLoggedIn, async (req, res, next) => {
         const {longitude, latitude, rating, message} = req.body;
         const position = await Position.create({
+            email: req.user.email,
             longitude,
             latitude,
             rating,
