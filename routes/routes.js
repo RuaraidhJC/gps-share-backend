@@ -23,7 +23,7 @@ module.exports = function(app, passport) {
             message
         });
         await req.user.addPosition(position);
-        const emailList = req.user['Friends'].map(elem => elem.email);
+        const emailList = req.user['Friends'].map(elem => elem.email) || [];
         return next(new HttpResponse.OkResponse('ok', 'ok', {userList: [req.user.list, ...emailList], message: 'A new position has been shared with you', body: `${req.user.email} sent you his position`}));
     });
 
