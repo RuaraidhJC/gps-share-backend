@@ -1,5 +1,5 @@
-import {Expo} from "expo-server-sdk";
-let expo = new Expo;
+const Expo = require('expo-server-sdk').Expo;
+let expo = new Expo();
 const OkResponse = require('./http/OkResponse');
 
 module.exports.HttpResponse = require('./http/HttpResponse');
